@@ -1,28 +1,172 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import axios from 'axios';
 import './App.css';
 
 class App extends Component {
+
+  constructor() {
+    super();
+    this.state = {
+      provinsi: [],
+      kotaAsal: [],
+      kotaTujuan: [],
+      data: {
+        origin: '',
+        destination: '',
+        weight: '',
+        courier: ''
+      },
+      hasil: []
+    }
+    this.handleProvince = this.handleProvince.bind(this);
+    this.handleProvinceTujuan = this.handleProvinceTujuan.bind(this);
+    this.handleWeightandCourier = this.handleWeightandCourier.bind(this);
+    this.handleCourier = this.handleCourier.bind(this);
+    this.handleKotaAsal = this.handleKotaAsal.bind(this);
+    this.handleKotaTujuan = this.handleKotaTujuan.bind(this);
+    this.cekOngkir = this.cekOngkir.bind(this);
+  }
+
+  componentDidMount() {
+    axios.get('http://localhost:3011/provinsi')
+      .then(response => {
+        this.setState({
+          provinsi: response.data.rajaongkir.results
+        })
+        // return axios.get('http://localhost:3011/kota')
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+  }
+
+  handleProvince(e) {
+    const id = e.target.value;
+    axios.get(`http://localhost:3011/kota/${id}`)
+      .then(response => {
+        this.setState({
+          kotaAsal: response.data.rajaongkir.results
+        })
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+  }
+
+  handleProvinceTujuan(e) {
+    const id = e.target.value;
+    axios.get(`http://localhost:3011/kota/${id}`)
+      .then(response => {
+        this.setState({
+          kotaTujuan: response.data.rajaongkir.results
+        })
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+  }
+
+  handleWeightandCourier = (name, value) => {
+    const data = this.state.data
+    data[name] = value
+  }
+
+  handleCourier(e) {
+    const data = this.state.data
+    const value = e.target.value;
+    data['courier'] = value;
+  }
+
+  handleKotaAsal(e) {
+    const data = this.state.data
+    const value = e.target.value;
+    data['origin'] = value;
+  }
+
+  handleKotaTujuan(e) {
+    const data = this.state.data
+    const value = e.target.value;
+    data['destination'] = value;
+  }
+
+  cekOngkir(e) {
+    e.preventDefault();
+    // const formData = new FormData();
+    // formData.append('origin', this.state.data.origin);
+    // formData.append('destination', this.state.data.destination);
+    // formData.append('weight', this.state.data.weight);
+    // formData.append('courier', this.state.data.courier);
+    axios.post('http://localhost:3011/ongkir', {
+      origin: this.state.data.origin,
+      destination: this.state.data.destination,
+      weight: this.state.data.weight,
+      courier: this.state.data.courier
+    })
+      .then(response => {
+        this.setState({
+          hasil: response.data.rajaongkir.results[0].costs
+        })
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+  }
+
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <form onSubmit={this.cekOngkir}>
+          <select onChange={this.handleProvince}>
+            {this.state.provinsi.map(function (r, i) {
+              return <option key={r.province_id} value={r.province_id}>{r.province}</option>
+            })}
+          </select>
+          <br />
+          <br />
+          <select onChange={this.handleKotaAsal}>
+            {this.state.kotaAsal.map(function (r, i) {
+              return <option key={r.city_id} value={r.city_id}>{r.type} {r.city_name}</option>
+            })}
+          </select>
+          <hr />
+          <select onChange={this.handleProvinceTujuan}>
+            {this.state.provinsi.map(function (r, i) {
+              return <option key={r.province_id} value={r.province_id}>{r.province}</option>
+            })}
+          </select>
+          <br />
+          <br />
+          <select onChange={this.handleKotaTujuan}>
+            {this.state.kotaTujuan.map(function (r, i) {
+              return <option key={r.city_id} value={r.city_id}>{r.type} {r.city_name}</option>
+            })}
+          </select>
+          <hr />
+          <input
+            type="text"
+            placeholder="Isi Berat"
+            onChange={event => this.handleWeightandCourier('weight', event.target.value)}
+          />
+          <br />
+          <br />
+          <select onChange={this.handleCourier}>
+            <option>-- PILIH KURIR --</option>
+            <option value="jne">JNE</option>
+            <option value="pos">POS</option>
+            <option value="tiki">TIKI</option>
+          </select>
+          <br />
+          <br />
+          <button>Cek</button>
+          <hr />
+          {this.state.hasil.map(function (r, i) {
+            return <p key={i}>Service : {r.service} ({r.description}) | Harga : {r.cost[0].value} | Etd : {r.cost[0].etd} hari</p>
+          })}
+        </form>
       </div>
     );
   }
 }
+
 
 export default App;
