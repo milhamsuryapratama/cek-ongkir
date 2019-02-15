@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import './App.css';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
 
 class App extends Component {
 
@@ -115,6 +120,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+        <strong><h2>Cek Ongkos Kirim</h2></strong>
         <form onSubmit={this.cekOngkir}>
           <select onChange={this.handleProvince}>
             {this.state.provinsi.map(function (r, i) {
@@ -159,9 +165,24 @@ class App extends Component {
           <br />
           <button>Cek</button>
           <hr />
-          {this.state.hasil.map(function (r, i) {
-            return <p key={i}>Service : {r.service} ({r.description}) | Harga : {r.cost[0].value} | Etd : {r.cost[0].etd} hari</p>
-          })}
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell component="th">Sercice</TableCell>
+                <TableCell component="th">Ongkos</TableCell>
+                <TableCell component="th">ETD</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {this.state.hasil.map(function (r, i) {
+                return <TableRow key={i}>
+                  <TableCell>{r.service} ({r.description})</TableCell>
+                  <TableCell>{r.cost[0].value}</TableCell>
+                  <TableCell>{r.cost[0].etd} hari</TableCell>
+                </TableRow>
+              })}
+            </TableBody>
+          </Table>
         </form>
       </div>
     );

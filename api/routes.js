@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 var http = require("https");
 const { init } = require('rajaongkir-node-js');
-const request = init('API_KEY', 'starter');
+const request = init('c506cdfc35a33e3d47fb068b799c0630', 'starter');
 //const RajaOngkir = require('rajaongkir-nodejs').Starter('c506cdfc35a33e3d47fb068b799c0630');
 
 router.get("/provinsi", function (req, res) {
